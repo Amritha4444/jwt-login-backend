@@ -22,8 +22,8 @@ This project is the Node.js backend for a full-stack JWT Login System. It provid
 
 ## Demo Login Credentials
 
-Email: test@example.com  
-Password: 123456
+Email: demo@gmail.com
+Password: demo123
 
 ## Project Structure
 
