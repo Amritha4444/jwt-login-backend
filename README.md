@@ -4,7 +4,7 @@ This project is the Node.js backend for a full-stack JWT Login System. It provid
 
 ## Technologies Used
 
-- Node.js
+- Node.jss
 - Express.js
 - SQLite
 - JSON Web Token (JWT)
