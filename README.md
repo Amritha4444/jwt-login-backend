@@ -36,3 +36,10 @@ backend
 ├── package-lock.json
 ├── .gitignore
 └── users.db
+
+## Demo Login
+
+Email: demo@gmail.com
+Password: demo123
+
+The SQLite database and demo user are created automatically when the backend is started.

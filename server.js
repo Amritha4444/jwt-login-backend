@@ -1,82 +1,71 @@
-const express = require("express");
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
-const db = require("./database");
+const express = require('express');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const db = require('./database');
 
 const app = express();
 const PORT = 3000;
 
+const SECRET_KEY = 'mysecretkey';
+
 app.use(cors());
 app.use(express.json());
 
-const SECRET_KEY = "mysecretkey";
+// LOGIN
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
 
-// JWT authentication middleware
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-        return res.status(401).json({
-            message: "Access denied. No token provided."
+    if (!email || !password) {
+        return res.status(400).json({
+            message: 'Email and password are required'
         });
     }
 
-    jwt.verify(token, SECRET_KEY, (err, user) => {
+    const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
+
+    db.get(sql, [email, password], (err, user) => {
         if (err) {
-            return res.status(403).json({
-                message: "Invalid or expired token."
+            return res.status(500).json({
+                message: 'Database error'
             });
         }
 
-        req.user = user;
-        next();
-    });
-};
+        if (!user) {
+            return res.status(401).json({
+                message: 'Invalid email or password'
+            });
+        }
 
-// Login API
-app.post("/api/login", (req, res) => {
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email
+            },
+            SECRET_KEY,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        res.json({
+            message: 'Login successful',
+            token: token
+        });
+    });
+});
+
+// SIGNUP
+app.post('/api/signup', (req, res) => {
     const { email, password } = req.body;
 
-    db.get(
-        "SELECT * FROM users WHERE email = ? AND password = ?",
-        [email, password],
-        (err, user) => {
+    if (!email || !password) {
+        return res.status(400).json({
+            message: 'Email and password are required'
+        });
+    }
 
-            if (err) {
-                return res.status(500).json({
-                    message: "Database error"
-                });
-            }
-
-            if (!user) {
-                return res.status(401).json({
-                    message: "Invalid email or password"
-                });
-            }
-
-            const token = jwt.sign(
-                { email: user.email },
-                SECRET_KEY,
-                { expiresIn: "1h" }
-            );
-
-            res.json({
-                message: "Login successful",
-                token: token
-            });
-        }
-    );
+    const sql = 'INSERT INTO users (email, password) VALUES (?, ?)';
 });
-
-// Protected Dashboard API
-app.get("/api/dashboard", authenticateToken, (req, res) => {
-    res.json({
-        message: "Welcome to the dashboard",
-        user: req.user
-    });
-});
-
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
