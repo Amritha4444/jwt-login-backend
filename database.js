@@ -22,4 +22,15 @@ db.run(`
     }
 });
 
+db.run(`
+    INSERT OR IGNORE INTO users (email, password)
+    VALUES ('test@example.com', '123456')
+`, (err) => {
+    if (err) {
+        console.error('Demo user creation failed:', err.message);
+    } else {
+        console.log('Demo user ready.');
+    }
+});
+
 module.exports = db;
