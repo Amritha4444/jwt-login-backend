@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');
 
 const db = new sqlite3.Database('./users.db', (err) => {
     if (err) {
@@ -15,7 +16,7 @@ db.run(`
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
     )
-`, (err) => {
+`, async (err) => {
     if (err) {
         console.error('Error creating users table:', err.message);
         return;
@@ -23,21 +24,27 @@ db.run(`
 
     console.log('Users table ready.');
 
-    // Create demo user if it doesn't already exist
+    // Create demo user with hashed password
     const demoEmail = 'demo@gmail.com';
     const demoPassword = 'demo123';
 
-    db.run(
-        'INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)',
-        [demoEmail, demoPassword],
-        (err) => {
-            if (err) {
-                console.error('Error creating demo user:', err.message);
-            } else {
-                console.log('Demo user ready.');
+    try {
+        const hashedPassword = await bcrypt.hash(demoPassword, 10);
+
+        db.run(
+            'INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)',
+            [demoEmail, hashedPassword],
+            (err) => {
+                if (err) {
+                    console.error('Error creating demo user:', err.message);
+                } else {
+                    console.log('Demo user ready.');
+                }
             }
-        }
-    );
+        );
+    } catch (error) {
+        console.error('Error hashing demo password:', error.message);
+    }
 });
 
 module.exports = db;
