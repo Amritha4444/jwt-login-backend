@@ -1,7 +1,6 @@
 import app from './app';
+import { env } from './config/env';
 
-const PORT = 3000;
-
-app.listen(PORT, () => {
-  console.log(`TypeScript server running on http://localhost:${PORT}`);
+app.listen(env.port, () => {
+  console.log(`TypeScript server running on http://localhost:${env.port}`);
 });
