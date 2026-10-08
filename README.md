@@ -49,8 +49,8 @@ backend/
 │   │   ├── jwt.ts
 │   │   └── password.ts
 │   ├── app.ts
+│   ├── database.ts
 │   └── index.ts
-├── database.js
 ├── package.json
 ├── package-lock.json
 ├── tsconfig.json
