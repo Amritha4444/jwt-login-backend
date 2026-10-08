@@ -1,4 +1,4 @@
-const db = require('../../../database');
+import db from '../../database';
 
 export function findUserByEmail(email: string): Promise<any> {
   return new Promise((resolve, reject) => {
