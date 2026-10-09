@@ -5,8 +5,13 @@ export function errorMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
-) {
+): void {
   console.error(err);
+
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
 
   res.status(500).json({
     success: false,
