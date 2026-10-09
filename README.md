@@ -170,13 +170,20 @@ For local testing:
 
 The demo user's password is stored as a bcrypt hash in the SQLite database. Do not use demo credentials in production.
 
-## Testing
+##Testing
 
 Run the automated tests:
 
-bash
-npx jest --config=jest.config.ts --runInBand
+npm test
 
+To build the TypeScript backend, run:
 
-The current test file checks basic email-format and password-length conditions.
+npm run build
 
+To start the development server, run:
+
+npm run dev
+
+The current automated tests check basic email-format and password-length validation. They do not yet test the complete login or signup API flow.
+
+Before submitting, verify that the build completes successfully and the tests pass.
