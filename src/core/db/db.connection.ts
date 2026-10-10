@@ -1,5 +1,5 @@
 import sqlite3 from 'sqlite3';
-import bcrypt from 'bcrypt';
+import { hashPassword } from '../../utils/password';
 
 const db = new sqlite3.Database('./users.db', (err) => {
   if (err) {
@@ -27,14 +27,17 @@ db.run(
     const demoPassword = 'demo123';
 
     try {
-      const hashedPassword = await bcrypt.hash(demoPassword, 10);
+      const hashedPassword = await hashPassword(demoPassword);
 
       db.run(
         'INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)',
         [demoEmail, hashedPassword],
         (insertError) => {
           if (insertError) {
-            console.error('Error creating demo user:', insertError.message);
+            console.error(
+              'Error creating demo user:',
+              insertError.message
+            );
           } else {
             console.log('Demo user ready.');
           }
