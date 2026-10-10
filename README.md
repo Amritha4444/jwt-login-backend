@@ -1,11 +1,21 @@
+JWT Authentication Backend
 
-# JWT Login System — Node.js Backend
+A REST API built with Node.js, Express, TypeScript, SQLite, and JSON Web Tokens (JWT). It supports user registration, login, password hashing, and protected API routes.
 
-## Project Overview
+Features
 
-This project provides the backend API for a full-stack JWT Login System. It uses Node.js, Express.js, TypeScript, SQLite, bcrypt, and JSON Web Tokens (JWT) to handle user registration, login, and protected routes.
+- User registration and login
+- Password hashing using bcrypt
+- JWT-based authentication
+- Protected API routes using Bearer tokens
+- SQLite database for user storage
+- Request validation
+- Consistent API response format
+- Swagger UI API documentation
+- Automated tests
+- TypeScript for type safety
 
-## Technologies Used
+Tech Stack
 
 - Node.js
 - Express.js
@@ -13,31 +23,20 @@ This project provides the backend API for a full-stack JWT Login System. It uses
 - SQLite
 - bcrypt
 - JSON Web Token (JWT)
-- Zod for request validation
-- CORS
-- dotenv
-- Jest and ts-jest for automated tests
+- Swagger UI and swagger-jsdoc
+- Jest (testing)
 
-## Features
+Project Structure
 
-- User signup and login using email and password
-- Password hashing with bcrypt
-- SQLite database integration
-- JWT generation after successful login
-- JWT verification middleware for protected routes
-- Request validation using Zod
-- Duplicate email handling
-- Centralized error-handling middleware
-- Environment-based configuration
-- Restricted CORS configuration
-
-## Project Structure
-
-text
 backend/
 ├── src/
 │   ├── config/
 │   │   └── env.ts
+│   ├── core/
+│   │   ├── db/
+│   │   │   └── db.connection.ts
+│   │   └── swagger/
+│   │       └── swagger.config.ts
 │   ├── middleware/
 │   │   ├── auth.middleware.ts
 │   │   └── error.middleware.ts
@@ -53,138 +52,193 @@ backend/
 │   │   ├── jwt.ts
 │   │   └── password.ts
 │   ├── app.ts
-│   ├── database.ts
 │   └── index.ts
 ├── tests/
-│   └── auth.test.ts
-├── jest.config.ts
+├── .env.example
+├── .gitignore
 ├── package.json
 ├── package-lock.json
 ├── tsconfig.json
-├── .env.example
-└── .gitignore
+└── README.md
 
+Note: The structure above represents the intended organization. Keep it consistent with the actual files in your repository.
 
-## Prerequisites
+Prerequisites
 
-Install Node.js and npm before running the project.
+Install the following before running the project:
 
-## Installation and Setup
+- Node.js
+- npm
+- Git
 
-1. Open a terminal in the backend directory.
-2. Install dependencies:
+Installation
 
-   bash
-   npm install
-   
+Clone the repository:
 
-3. Create a .env file by copying .env.example:
+git clone https://github.com/Amritha4444/jwt-login-backend.git
 
-   powershell
-   Copy-Item .env.example .env
-   
+Move into the project directory:
 
-4. Open .env and configure the environment variables:
+cd jwt-login-backend
 
-   dotenv
-   PORT=3000
-   JWT_SECRET=replace_with_a_long_random_secret
-   JWT_EXPIRES_IN=1h
-   ALLOWED_ORIGINS=http://localhost:4200
-   
+Install dependencies:
 
-   Use a strong, private JWT secret. Never commit your actual .env file or production secrets to GitHub.
+npm install
 
-## Running the Project
+Environment Configuration
+
+Create a ".env" file in the backend root directory.
+
+Configure the environment variables required by the application:
+
+PORT=3000
+JWT_SECRET=your_long_random_secret_here
+
+Use a strong, private JWT secret in your local environment. Never commit your actual ".env" file or secret to GitHub.
+
+If the project uses additional environment variables, add them according to the application's configuration.
+
+Running the Application
 
 Start the development server:
 
-bash
 npm run dev
 
+The backend runs at:
 
-Build the TypeScript project:
+"http://localhost:3000"
 
-bash
-npm run build
+The exact startup command depends on the scripts configured in "package.json".
 
+API Documentation (Swagger)
 
-Start the compiled application:
+Swagger UI provides interactive documentation for the authentication APIs.
 
-bash
-npm start
+Start the backend server and open:
 
+http://localhost:3000/api-docs
 
-## API Endpoints
+Available Endpoints
 
-### 1. Login
+Method| Endpoint| Description| Authentication
+POST| "/api/auth/signup"| Register a new user| Not required
+POST| "/api/auth/login"| Log in and receive a JWT token| Not required
+GET| "/api/auth/me"| Retrieve the authenticated user's details| Bearer token required
 
-*Endpoint:* POST /api/auth/login
+Testing with Swagger
 
-Request body:
+1. Start the backend server.
+2. Open the Swagger UI URL.
+3. Expand an endpoint and click Try it out.
+4. Enter the required request body and execute the request.
+5. For protected endpoints, log in and copy the returned JWT token.
+6. Click Authorize and enter the token in the format indicated by the Swagger interface.
+7. Execute "GET /api/auth/me" to test the protected route.
 
-json
+API Request Examples
+
+1. Signup
+
+Endpoint: "POST /api/auth/signup"
+
+Example request:
+
 {
-  "email": "demo@gmail.com",
-  "password": "demo123"
+  "email": "user@example.com",
+  "password": "Password123"
 }
 
+A successful registration should return an appropriate success response. Registering an email that already exists should return a conflict response.
 
-A successful login returns a JWT token. Invalid request data returns HTTP 400; incorrect credentials return HTTP 401.
+2. Login
 
-### 2. Signup
+Endpoint: "POST /api/auth/login"
 
-*Endpoint:* POST /api/auth/signup
+Example request:
 
-Request body:
-
-json
 {
-  "email": "newuser@gmail.com",
-  "password": "password123"
+  "email": "user@example.com",
+  "password": "Password123"
 }
 
+A successful login returns a JWT token. Use that token to access protected routes.
 
-The email must be valid and the password must contain at least six characters. Successful registration returns HTTP 201. Invalid input returns HTTP 400, and a duplicate email returns HTTP 409.
+3. Get Current User
 
-### 3. Get Current User
+Endpoint: "GET /api/auth/me"
 
-*Endpoint:* GET /api/auth/me
+Required header:
 
-This route requires a valid JWT.
+Authorization: Bearer <your_jwt_token>
 
-Request header:
+This endpoint returns details for the authenticated user.
 
-text
-Authorization: Bearer <JWT_TOKEN>
+Response Format
 
+The API uses a consistent response structure:
 
-Requests without a valid token are rejected.
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {}
+}
 
-## Demo Credentials
+Error responses use the same general structure with "success" set to "false", an appropriate message, and "data" set to "null", where applicable.
 
-For local testing:
+Common HTTP status codes include:
 
-- *Email:* demo@gmail.com
-- *Password:* demo123
+- "200 OK" — Request successful
+- "201 Created" — Resource created successfully
+- "400 Bad Request" — Invalid request data
+- "401 Unauthorized" — Missing or invalid authentication
+- "409 Conflict" — Resource already exists
+- "500 Internal Server Error" — Unexpected server error
 
-The demo user's password is stored as a bcrypt hash in the SQLite database. Do not use demo credentials in production.
+Actual status codes depend on the endpoint and error condition.
 
-## Testing
+Database
+
+The application uses SQLite to store user information.
+
+- The database connection is managed in the core database module.
+- User records are managed through the authentication repository.
+- Passwords should be stored as bcrypt hashes, not plain text.
+- Database initialization and demo-user creation depend on the configured application logic.
+
+Use only the demo credentials configured by the project when testing locally.
+
+Validation and Security
+
+- Validate incoming authentication requests.
+- Hash passwords before storing them.
+- Verify passwords during login.
+- Sign and verify JWT tokens using a secret stored in environment variables.
+- Protect authenticated routes with authentication middleware.
+- Do not return password hashes or JWT secrets in API responses.
+- Do not commit ".env" files or private credentials.
+
+Testing
 
 Run the automated tests:
 
 npm test
 
-Build the TypeScript backend:
+The tests verify the behavior covered by the existing test suite. Passing these tests does not necessarily confirm that every API integration flow has been tested.
+
+Build
+
+Compile the TypeScript code:
 
 npm run build
 
-Start the development server:
+Run the compiled application using the start script configured in "package.json", if available.
 
-npm run dev
+GitHub Repository
 
-The current automated tests check basic email-format and password-length validation. They do not yet test the complete login or signup API flow.
+Backend repository:
 
-Before submitting, verify that the build completes successfully and the tests pass.
+https://github.com/Amritha4444/jwt-login-backend
 
+Author
+
+Developed as a JWT authentication backend project using TypeScript and Express.
