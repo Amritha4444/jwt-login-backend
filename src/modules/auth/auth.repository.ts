@@ -1,4 +1,4 @@
-import db from '../../database';
+import db from '../../core/db/db.connection';
 
 export function findUserByEmail(email: string): Promise<any> {
   return new Promise((resolve, reject) => {

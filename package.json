@@ -4,11 +4,11 @@
   "description": "JWT Authentication Backend using Node.js, Express, TypeScript and SQLite",
   "main": "dist/index.js",
   "scripts": {
-  "build": "tsc",
-  "start": "node dist/index.js",
-  "dev": "tsx watch src/index.ts",
-  "test": "jest --config=jest.config.ts --runInBand"
-},
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest --config=jest.config.ts --runInBand"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,6 +20,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "sqlite3": "^6.0.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -31,6 +33,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.4",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.5.2",
     "supertest": "^7.3.1",
     "ts-jest": "^29.4.14",

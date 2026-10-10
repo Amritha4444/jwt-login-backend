@@ -10,13 +10,11 @@ const db = new sqlite3.Database('./users.db', (err) => {
 });
 
 db.run(
-  `
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL
-    )
-  `,
+  `CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+  )`,
   async (err) => {
     if (err) {
       console.error('Error creating users table:', err.message);
@@ -34,9 +32,9 @@ db.run(
       db.run(
         'INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)',
         [demoEmail, hashedPassword],
-        (err) => {
-          if (err) {
-            console.error('Error creating demo user:', err.message);
+        (insertError) => {
+          if (insertError) {
+            console.error('Error creating demo user:', insertError.message);
           } else {
             console.log('Demo user ready.');
           }
