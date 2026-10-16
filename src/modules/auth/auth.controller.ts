@@ -1,95 +1,140 @@
 import { Request, Response, NextFunction } from 'express';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { loginUser, signupUser } from './auth.service';
-import { loginSchema, signupSchema } from './auth.dto';
+import { LoginDto, SignupDto } from './auth.dto';
+import { BadRequestError } from '../../core/errors/http.error';
 
-export async function login(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  const validation = loginSchema.safeParse(req.body);
+export class AuthController {
+  /**
+   * @swagger
+   * /api/auth/login:
+   *   post:
+   *     summary: Log in a user
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AuthRequest'
+   *     responses:
+   *       '200':
+   *         description: Login successful
+   *       '400':
+   *         description: Invalid request data
+   *       '401':
+   *         description: Invalid email or password
+   *       '500':
+   *         description: Internal server error
+   */
+  static async login(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const dto = plainToInstance(LoginDto, req.body);
+      const errors = await validate(dto);
 
-  if (!validation.success) {
-    res.status(400).json({
-      success: false,
-      message: validation.error.issues[0]?.message || 'Invalid input',
-      data: null
-    });
-    return;
+      if (errors.length > 0) {
+        const message = errors[0].constraints
+          ? Object.values(errors[0].constraints)[0]
+          : 'Invalid input';
+
+        throw new BadRequestError(message);
+      }
+
+      const data = await loginUser(dto.email, dto.password);
+
+      res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
   }
 
-  try {
-    const { email, password } = validation.data;
-    const data = await loginUser(email, password);
+  /**
+   * @swagger
+   * /api/auth/signup:
+   *   post:
+   *     summary: Register a new user
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AuthRequest'
+   *     responses:
+   *       '201':
+   *         description: Signup successful
+   *       '400':
+   *         description: Invalid request data
+   *       '409':
+   *         description: Email already exists
+   *       '500':
+   *         description: Internal server error
+   */
+  static async signup(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const dto = plainToInstance(SignupDto, req.body);
+      const errors = await validate(dto);
+
+      if (errors.length > 0) {
+        const message = errors[0].constraints
+          ? Object.values(errors[0].constraints)[0]
+          : 'Invalid input';
+
+        throw new BadRequestError(message);
+      }
+
+      const data = await signupUser(dto.email, dto.password);
+
+      res.status(201).json({
+        success: true,
+        message: 'Signup successful',
+        data
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/auth/me:
+   *   get:
+   *     summary: Get the authenticated user's details
+   *     tags: [Authentication]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       '200':
+   *         description: User details retrieved successfully
+   *       '401':
+   *         description: Missing or invalid JWT
+   *       '500':
+   *         description: Internal server error
+   */
+  static getMe(req: Request, res: Response): void {
+    const user = (
+      req as Request & {
+        user?: { id: number; email: string };
+      }
+    ).user;
 
     res.status(200).json({
       success: true,
-      message: 'Login successful',
-      data
+      message: 'User details retrieved successfully',
+      data: { user }
     });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === 'INVALID_CREDENTIALS') {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        data: null
-      });
-      return;
-    }
-
-    next(error);
   }
-}
-
-export async function signup(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  const validation = signupSchema.safeParse(req.body);
-
-  if (!validation.success) {
-    res.status(400).json({
-      success: false,
-      message: validation.error.issues[0]?.message || 'Invalid input',
-      data: null
-    });
-    return;
-  }
-
-  try {
-    const { email, password } = validation.data;
-    const data = await signupUser(email, password);
-
-    res.status(201).json({
-      success: true,
-      message: 'Signup successful',
-      data
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === 'EMAIL_EXISTS') {
-      res.status(409).json({
-        success: false,
-        message: 'Email already exists',
-        data: null
-      });
-      return;
-    }
-
-    next(error);
-  }
-}
-
-export function getMe(req: Request, res: Response): Response {
-  return res.status(200).json({
-    success: true,
-    message: 'User details retrieved successfully',
-    data: {
-      user: (
-        req as Request & {
-          user?: { id: number; email: string };
-        }
-      ).user
-    }
-  });
 }

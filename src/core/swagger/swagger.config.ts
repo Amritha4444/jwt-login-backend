@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { env } from '../../config/env';
 
 const swaggerOptions: swaggerJsdoc.Options = {
   definition: {
@@ -11,7 +12,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: `http://localhost:${env.port}`,
         description: 'Local development server'
       }
     ],
@@ -36,6 +37,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
             password: {
               type: 'string',
               format: 'password',
+              minLength: 6,
               example: 'demo123'
             }
           }
@@ -44,8 +46,14 @@ const swaggerOptions: swaggerJsdoc.Options = {
           type: 'object',
           required: ['success', 'message', 'data'],
           properties: {
-            success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Request successful' },
+            success: {
+              type: 'boolean',
+              example: true
+            },
+            message: {
+              type: 'string',
+              example: 'Request successful'
+            },
             data: {
               type: 'object',
               nullable: true,
@@ -56,7 +64,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
       }
     }
   },
-  apis: ['./src/modules/auth/*.ts']
+  apis: ['./src/modules/auth/auth.controller.ts']
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);

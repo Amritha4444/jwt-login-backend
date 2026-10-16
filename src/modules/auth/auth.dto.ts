@@ -1,23 +1,21 @@
-import { z } from 'zod';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
-export const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .email('Please enter a valid email address.'),
+export class LoginDto {
+  @IsEmail({}, { message: 'Please enter a valid email address.' })
+  email!: string;
 
-  password: z
-    .string()
-    .min(1, 'Password is required.')
-});
+  @IsString()
+  @MinLength(1, { message: 'Password is required.' })
+  password!: string;
+}
 
-export const signupSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .email('Please enter a valid email address.'),
+export class SignupDto {
+  @IsEmail({}, { message: 'Please enter a valid email address.' })
+  email!: string;
 
-  password: z
-    .string()
-    .min(6, 'Password must be at least 6 characters long.')
-});
+  @IsString()
+  @MinLength(6, {
+    message: 'Password must be at least 6 characters long.'
+  })
+  password!: string;
+}

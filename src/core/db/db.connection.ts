@@ -1,7 +1,8 @@
 import sqlite3 from 'sqlite3';
 import { hashPassword } from '../../utils/password';
+import { env } from '../../config/env';
 
-const db = new sqlite3.Database('./users.db', (err) => {
+const db = new sqlite3.Database(env.databasePath, (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {

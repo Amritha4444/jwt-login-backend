@@ -10,6 +10,10 @@ import {
 
 import { generateToken } from '../../utils/jwt';
 
+import {
+  UnauthorizedError,
+  ConflictError
+} from '../../core/errors/http.error';
 
 export async function loginUser(
   email: string,
@@ -18,7 +22,7 @@ export async function loginUser(
   const user = await findUserByEmail(email);
 
   if (!user) {
-    throw new Error('INVALID_CREDENTIALS');
+    throw new UnauthorizedError('Invalid email or password');
   }
 
   const validPassword = await verifyPassword(
@@ -27,7 +31,7 @@ export async function loginUser(
   );
 
   if (!validPassword) {
-    throw new Error('INVALID_CREDENTIALS');
+    throw new UnauthorizedError('Invalid email or password');
   }
 
   const token = generateToken({
@@ -44,7 +48,6 @@ export async function loginUser(
   };
 }
 
-
 export async function signupUser(
   email: string,
   password: string
@@ -52,7 +55,7 @@ export async function signupUser(
   const existingUser = await findUserByEmail(email);
 
   if (existingUser) {
-    throw new Error('EMAIL_EXISTS');
+    throw new ConflictError('Email already exists');
   }
 
   const hashedPassword = await hashPassword(password);
