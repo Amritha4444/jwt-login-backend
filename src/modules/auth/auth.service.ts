@@ -27,7 +27,7 @@ export async function loginUser(
 
   const validPassword = await verifyPassword(
     password,
-    user.password
+    user.password_hash
   );
 
   if (!validPassword) {

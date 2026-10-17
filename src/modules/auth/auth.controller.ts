@@ -3,6 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { loginUser, signupUser } from './auth.service';
 import { LoginDto, SignupDto } from './auth.dto';
+import { SafeUser } from './user.model';
 import { BadRequestError } from '../../core/errors/http.error';
 
 export class AuthController {
@@ -21,12 +22,28 @@ export class AuthController {
    *     responses:
    *       '200':
    *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ApiResponse'
    *       '400':
    *         description: Invalid request data
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    *       '401':
    *         description: Invalid email or password
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    *       '500':
    *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    */
   static async login(
     req: Request,
@@ -72,12 +89,28 @@ export class AuthController {
    *     responses:
    *       '201':
    *         description: Signup successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ApiResponse'
    *       '400':
    *         description: Invalid request data
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    *       '409':
    *         description: Email already exists
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    *       '500':
    *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    */
   static async signup(
     req: Request,
@@ -119,16 +152,26 @@ export class AuthController {
    *     responses:
    *       '200':
    *         description: User details retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ApiResponse'
    *       '401':
    *         description: Missing or invalid JWT
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    *       '500':
    *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
    */
   static getMe(req: Request, res: Response): void {
     const user = (
-      req as Request & {
-        user?: { id: number; email: string };
-      }
+      req as Request & { user?: SafeUser }
     ).user;
 
     res.status(200).json({
