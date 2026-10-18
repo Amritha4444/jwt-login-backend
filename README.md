@@ -1,20 +1,20 @@
 JWT Authentication Backend
 
-A secure REST API built using Node.js, Express.js, TypeScript, SQLite, and JSON Web Tokens (JWT). It supports user registration, login, and protected user profile access.
+A REST API for user authentication built with Node.js, Express, TypeScript, and SQLite. The application supports user signup, login, JWT-based authentication, and protected user profile access.
 
 Features
 
-- User signup and login
-- Password hashing with bcrypt
+- User registration and login
+- Password hashing using bcrypt
 - JWT-based authentication
 - Protected API routes
-- Request validation using class-validator
+- Request validation
+- SQLite database integration
 - Centralized error handling
-- SQLite database
+- Environment variable configuration
 - Swagger API documentation
-- Automated tests using Jest and Supertest
 
-Tech Stack
+Technologies Used
 
 - Node.js
 - Express.js
@@ -22,41 +22,44 @@ Tech Stack
 - SQLite
 - JSON Web Token (JWT)
 - bcrypt
-- class-validator and class-transformer
-- Swagger UI and swagger-jsdoc
-- Jest and Supertest
+- Zod (request validation)
+- Swagger UI and OpenAPI
 
 Project Structure
 
 backend/
-└── src/
-    ├── config/
-    │   └── env.ts
-    ├── core/
-    │   ├── db/
-    │   │   └── db.connection.ts
-    │   ├── errors/
-    │   │   └── http.error.ts
-    │   └── swagger/
-    │       └── swagger.config.ts
-    ├── middleware/
-    │   ├── auth.middleware.ts
-    │   └── error.middleware.ts
-    ├── modules/
-    │   └── auth/
-    │       ├── auth.controller.ts
-    │       ├── auth.dto.ts
-    │       ├── auth.repository.ts
-    │       ├── auth.routes.ts
-    │       ├── auth.service.ts
-    │       └── user.model.ts
-    ├── utils/
-    │   ├── jwt.ts
-    │   └── password.ts
-    ├── app.ts
-    └── index.ts
+├── src/
+│   ├── config/
+│   │   └── env.ts
+│   ├── core/
+│   │   ├── db/
+│   │   │   └── db.connection.ts
+│   │   └── swagger/
+│   │       └── swagger.config.ts
+│   ├── middleware/
+│   │   ├── auth.middleware.ts
+│   │   └── error.middleware.ts
+│   ├── modules/
+│   │   └── auth/
+│   │       ├── auth.controller.ts
+│   │       ├── auth.dto.ts
+│   │       ├── auth.repository.ts
+│   │       ├── auth.routes.ts
+│   │       ├── auth.service.ts
+│   │       └── user.model.ts
+│   ├── utils/
+│   │   ├── jwt.ts
+│   │   └── password.ts
+│   ├── app.ts
+│   └── index.ts
+├── .env.example
+├── package.json
+├── package-lock.json
+└── tsconfig.json
 
 Prerequisites
+
+Install the following:
 
 - Node.js
 - npm
@@ -64,90 +67,112 @@ Prerequisites
 
 Installation
 
-Clone the repository and install dependencies:
+Clone the repository:
 
 git clone https://github.com/Amritha4444/jwt-login-backend.git
+
+Navigate to the backend directory:
+
 cd jwt-login-backend
+
+Install the dependencies:
+
 npm install
 
 Environment Configuration
 
 Create a ".env" file in the backend root directory.
 
+Configure the required environment variables according to your project:
+
 PORT=3000
-JWT_SECRET=your_long_random_secret
+JWT_SECRET=your_secure_secret_key
 
-Use a strong, private JWT secret. Never upload your real ".env" file to GitHub.
+Use a strong, private JWT secret. Never commit your actual ".env" file or expose your JWT secret on GitHub.
 
-Running the Application
+Run the Application
 
-Start the development server:
+Use the development command configured in your "package.json". For example, if your project uses "tsx":
 
 npm run dev
 
-Build the TypeScript project:
+If your project uses a different development script, use the script defined in "package.json".
 
-npm run build
+The API should be available at:
 
-Run the tests:
-
-npm test
-
-Use the scripts defined in "package.json" if their names differ.
+"http://localhost:3000"
 
 API Endpoints
 
-Base URL: "http://localhost:3000"
+Base URL: "http://localhost:3000/api"
 
-Method| Endpoint| Description
-POST| "/api/auth/signup"| Register a new user
-POST| "/api/auth/login"| Log in and receive a JWT
-GET| "/api/auth/me"| Get the authenticated user's details
+Method| Endpoint| Description| Access
+POST| "/auth/signup"| Register a new user| Public
+POST| "/auth/login"| Authenticate a user| Public
+GET| "/auth/me"| Retrieve the authenticated user's details| Protected
 
-Swagger API Documentation
+Signup
 
-Open the following URL after starting the backend:
+Request body:
 
-"http://localhost:3000/api-docs"
+{
+  "email": "user@example.com",
+  "password": "your_password"
+}
 
-Swagger UI allows you to view and test the API endpoints, request bodies, responses, and authentication requirements.
+Registers a user after validating the request and securely hashing the password.
 
-Authentication
+Login
 
-After a successful login, the API returns a JWT token. Use this token to access protected endpoints.
+Request body:
+
+{
+  "email": "user@example.com",
+  "password": "your_password"
+}
+
+Validates the credentials and returns an authentication token when login succeeds.
+
+Get Current User
 
 Request header:
 
-Authorization: Bearer YOUR_JWT_TOKEN
+Authorization: Bearer <your_jwt_token>
 
-Replace "YOUR_JWT_TOKEN" with the token returned by the login endpoint.
+Returns the authenticated user's details when the token is valid.
 
-API Response Format
+API Documentation
 
-Successful response:
+If Swagger is configured, start the backend and open:
+
+"http://localhost:3000/api-docs"
+
+Swagger UI allows you to inspect the documented endpoints and test API requests.
+
+Response Format
+
+The API uses a consistent response structure:
 
 {
   "success": true,
-  "message": "Request successful",
+  "message": "Operation successful",
   "data": {}
 }
 
-Common HTTP status codes:
-
-- "200" — Request successful
-- "201" — User created successfully
-- "400" — Invalid request data
-- "401" — Authentication failed
-- "409" — Email already exists
-- "500" — Internal server error
+The actual "data" contents depend on the endpoint and result.
 
 Security
 
-- Passwords are stored as bcrypt hashes.
+- Passwords are hashed before being stored.
 - Protected routes require a valid JWT.
-- Secret keys are stored in environment variables.
-- Password hashes and secret keys must not be exposed in API responses.
+- Sensitive configuration is stored in environment variables.
+- Input validation is performed before processing requests.
+- Authentication errors are handled without exposing password hashes or secrets.
+
+Frontend Repository
+
+"JWT Authentication Frontend" (https://github.com/Amritha4444/jwt-login-frontend)
 
 Author
 
-JWT Authentication Project — Angular frontend and Node.js, Express.js, TypeScript, and SQLite backend.
+Amritha
