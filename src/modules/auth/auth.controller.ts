@@ -1,9 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
+import {
+  Request,
+  Response,
+  NextFunction
+} from 'express';
+
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { loginUser, signupUser } from './auth.service';
+
 import { LoginDto, SignupDto } from './auth.dto';
-import { SafeUser } from './user.model';
+import { loginUser, signupUser } from './auth.service';
 import { BadRequestError } from '../../core/errors/http.error';
 
 export class AuthController {
@@ -11,39 +16,27 @@ export class AuthController {
    * @swagger
    * /api/auth/login:
    *   post:
-   *     summary: Log in a user
-   *     tags: [Authentication]
+   *     tags:
+   *       - Authentication
+   *     summary: Log in an existing user
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             $ref: '#/components/schemas/AuthRequest'
+   *           example:
+   *             email: demo@gmail.com
+   *             password: demo123
    *     responses:
-   *       '200':
+   *       200:
    *         description: Login successful
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ApiResponse'
-   *       '400':
-   *         description: Invalid request data
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
-   *       '401':
+   *       400:
+   *         description: Invalid request body
+   *       401:
    *         description: Invalid email or password
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
-   *       '500':
+   *       500:
    *         description: Internal server error
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
    */
   static async login(
     req: Request,
@@ -55,11 +48,11 @@ export class AuthController {
       const errors = await validate(dto);
 
       if (errors.length > 0) {
-        const message = errors[0].constraints
-          ? Object.values(errors[0].constraints)[0]
-          : 'Invalid input';
-
-        throw new BadRequestError(message);
+        throw new BadRequestError(
+          errors[0]?.constraints
+            ? Object.values(errors[0].constraints)[0]
+            : 'Invalid input'
+        );
       }
 
       const data = await loginUser(dto.email, dto.password);
@@ -69,7 +62,7 @@ export class AuthController {
         message: 'Login successful',
         data
       });
-    } catch (error: unknown) {
+    } catch (error) {
       next(error);
     }
   }
@@ -78,39 +71,27 @@ export class AuthController {
    * @swagger
    * /api/auth/signup:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Register a new user
-   *     tags: [Authentication]
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             $ref: '#/components/schemas/AuthRequest'
+   *           example:
+   *             email: newuser@example.com
+   *             password: password123
    *     responses:
-   *       '201':
+   *       201:
    *         description: Signup successful
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ApiResponse'
-   *       '400':
-   *         description: Invalid request data
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
-   *       '409':
+   *       400:
+   *         description: Invalid request body
+   *       409:
    *         description: Email already exists
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
-   *       '500':
+   *       500:
    *         description: Internal server error
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
    */
   static async signup(
     req: Request,
@@ -122,11 +103,11 @@ export class AuthController {
       const errors = await validate(dto);
 
       if (errors.length > 0) {
-        const message = errors[0].constraints
-          ? Object.values(errors[0].constraints)[0]
-          : 'Invalid input';
-
-        throw new BadRequestError(message);
+        throw new BadRequestError(
+          errors[0]?.constraints
+            ? Object.values(errors[0].constraints)[0]
+            : 'Invalid input'
+        );
       }
 
       const data = await signupUser(dto.email, dto.password);
@@ -136,7 +117,7 @@ export class AuthController {
         message: 'Signup successful',
         data
       });
-    } catch (error: unknown) {
+    } catch (error) {
       next(error);
     }
   }
@@ -145,39 +126,33 @@ export class AuthController {
    * @swagger
    * /api/auth/me:
    *   get:
-   *     summary: Get the authenticated user's details
-   *     tags: [Authentication]
+   *     tags:
+   *       - Authentication
+   *     summary: Get the logged-in user's details
    *     security:
    *       - bearerAuth: []
    *     responses:
-   *       '200':
+   *       200:
    *         description: User details retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ApiResponse'
-   *       '401':
-   *         description: Missing or invalid JWT
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
-   *       '500':
+   *       401:
+   *         description: Missing or invalid token
+   *       500:
    *         description: Internal server error
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ErrorResponse'
    */
-  static getMe(req: Request, res: Response): void {
+  static async getMe(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     const user = (
-      req as Request & { user?: SafeUser }
+      req as Request & {
+        user?: { id: number; email: string };
+      }
     ).user;
 
     res.status(200).json({
       success: true,
       message: 'User details retrieved successfully',
-      data: { user }
+      data: user
     });
   }
 }

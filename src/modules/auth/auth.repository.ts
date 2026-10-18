@@ -1,5 +1,7 @@
+import * as sqlite3 from 'sqlite3';
 import db from '../../core/db/db.connection';
 import { User } from './user.model';
+import { ConflictError } from '../../core/errors/http.error';
 
 export function findUserByEmail(
   email: string
@@ -47,8 +49,16 @@ export function createUser(
     db.run(
       'INSERT INTO users (email, password_hash) VALUES (?, ?)',
       [email, passwordHash],
-      function (this: { lastID: number }, err: Error | null) {
+      function (
+        this: sqlite3.RunResult,
+        err: Error | null
+      ) {
         if (err) {
+          if (err.message.includes('UNIQUE constraint failed')) {
+            reject(new ConflictError('Email already exists'));
+            return;
+          }
+
           reject(err);
           return;
         }
